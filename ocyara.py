@@ -174,5 +174,6 @@ if __name__ == '__main__':
     ocy.run(args.RULES_FILE)
     for rule in ocy.list_rules():
         for k,v in ocy.list_matches(rule).items():
-            print(k,[i for i in v])
+            for i in v:
+                print(rule,i)
 
