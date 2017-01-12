@@ -78,11 +78,12 @@ class OCyara:
             self.list_matches(rule)
 
     def run(self, yara_rule, auto_join=True):
-        """ Begin multithreaded processing of path files.
+        """
+        Begin multithreaded processing of path files.
         If auto_join is set to True the main process will stall until all of the worker processes have completed
         their work. If auto_join is set to False the main process must use the .join() method before exiting the main
-         proccess because it will be possible for the main process to finish before the worker processes do."""
-
+        proccess because it will be possible for the main process to finish before the worker processes do.
+        """
 
         # Populate the queue with work
         if type(self.path) == str:
