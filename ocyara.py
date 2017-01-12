@@ -8,6 +8,7 @@ from multiprocessing import Process, JoinableQueue, Lock, Manager, cpu_count
 from queue import Empty
 
 from PIL import Image
+import argparse
 
 
 def pdf_extract(pdffile):
@@ -83,7 +84,6 @@ class OCyara:
         their work. If auto_join is set to False the main process must use the .join() method before exiting the main
          proccess because it will be possible for the main process to finish before the worker processes do."""
 
-
         # Populate the queue with work
         if type(self.path) == str:
             # r1 = yara.compile(source='rule pdf { '
@@ -130,12 +130,12 @@ class OCyara:
         for k, v in self.matchedfiles[0].items():
             if rule in v:
                 files.append(k)
-        return rule, files
+        return dict(rule=files)
 
     def list_rules(self):
-        rules = []
+        rules = set()
         for k, v in self.matchedfiles[0].items():
-            rules.append([i for i in v])
+            [rules.add(i) for i in v]
         return rules
 
     def process_image(self, yara_rule):
@@ -163,3 +163,16 @@ class OCyara:
                             local_results_dict[filepath] = [x.rule]
                     self.matchedfiles[0] = local_results_dict
             self.q.task_done()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Use OCR to scan jpg, png or images imbedded in PDF documents')
+    parser.add_argument('RULES_FILE', type=str, help='path of file containing yara rules')
+    parser.add_argument('FILE', type=str, help='path or file name of images to scan.')
+    args = parser.parse_args()
+    ocy = OCyara(args.FILE)
+    ocy.run(args.RULES_FILE)
+    for rule in ocy.list_rules():
+        for k,v in ocy.list_matches(rule).items():
+            print(k,[i for i in v])
+
