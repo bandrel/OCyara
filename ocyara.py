@@ -6,7 +6,7 @@ import tesserocr
 import yara
 from multiprocessing import Process, JoinableQueue, Lock, Manager, cpu_count
 from queue import Empty
-
+import tempfile
 from PIL import Image
 import argparse
 
@@ -40,14 +40,12 @@ def pdf_extract(pdffile):
         istart += startfix
         iend += endfix
         jpg = pdf[istart:iend]
-        with open("jpg%d.jpg" % njpg, "wb") as jpgfile:
+        tempdir = tempfile.TemporaryDirectory()
+        with open(tempdir.name+"/jpg%d.jpg" % njpg, "wb") as jpgfile:
             jpgfile.write(jpg)
-        # jpgfile = tempfile.TemporaryFile(mode='w+b')
-        # pdf_images.append(jpgfile.name)
-        pdf_images.append("jpg%d.jpg" % njpg)
         njpg += 1
         i = iend
-    return pdf_images
+    return tempdir
 
 
 class OCyara:
@@ -105,8 +103,8 @@ class OCyara:
             for filepath in items_to_queue:
                 # Strip jpegs from PDF files and add them to the queue
                 if filepath.split('.')[-1].upper() == 'PDF':
-                    jpg_files = pdf_extract(filepath)
-                    for jpg_file in jpg_files:
+                    tempdir = pdf_extract(filepath)
+                    for jpg_file in glob.glob(tempdir.name+'/*.jpg'):
                         self.total_items_to_queue[0] += 1
                         self.q.put([Image.open(jpg_file), filepath])
                         self.total_added_to_queue[0] += 1
