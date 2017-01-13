@@ -1,5 +1,5 @@
 #!/usr/env python3
-from OCyara.ocyara import OCyara
+from ocyara import OCyara
 
 ocy = OCyara('Example.pdf')
 ocy.run('example.yara')
