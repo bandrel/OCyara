@@ -11,6 +11,8 @@ from PIL import Image
 import argparse
 
 
+
+
 class OCyara:
     """
     Whole Class doc string
@@ -36,9 +38,9 @@ class OCyara:
         self.total_added_to_queue = self.manager.list([0])
         self.tempdir = tempfile.TemporaryDirectory()
 
-    # def __call__(self):
-    #     for rule in self.list_rules():
-    #         self.list_matches(rule)
+    def __repr__(self):
+        for rule in self.list_rules():
+            self.list_matches(rule)
 
     def run(self, yara_rule, auto_join=True):
         """ Begin multithreaded processing of path files.
@@ -172,5 +174,4 @@ if __name__ == '__main__':
         for k,v in ocy.list_matches(rule).items():
             for i in v:
                 print(rule,i)
-
 
