@@ -164,9 +164,12 @@ class OCyara:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Use OCR to scan jpg, png or images imbedded in PDF documents')
-    parser.add_argument('RULES_FILE', type=str, help='path of file containing yara rules')
-    parser.add_argument('FILE', type=str, help='path or file name of images to scan.')
+    parser = argparse.ArgumentParser(description='OCyara performs OCR (Optical Character Recognition) on image '
+                                                 'files and scans them for matches to Yara rules '
+                                                 '(https://virustotal.github.io/yara/). OCyara also can process images '
+                                                 'embedded in PDF files.')
+    parser.add_argument('YARA_RULES_FILE', type=str, help='Path of file containing yara rules')
+    parser.add_argument('TARGET_FILE/S', type=str, help='Directory or file name of images to scan.')
     args = parser.parse_args()
     ocy = OCyara(args.FILE)
     ocy.run(args.RULES_FILE)
