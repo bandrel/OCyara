@@ -8,6 +8,6 @@ RUN pip3 install yara-python
 RUN pip3 install pillow
 RUN pip3 install cython
 RUN pip3 install tesserocr
-
+RUN pip3 install pytest
 WORKDIR /root
 
