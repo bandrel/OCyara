@@ -1,14 +1,18 @@
 sudo: required
-
-services:
-  - docker
-  
+ 
 language: python
 
 python:
   - "3.6"
 before_install:
-  - docker build -t bandrel/ocyara .
-install: "docker run -it bandrel/ocyara /bin/bash"
+  - apt-get update
+  - apt-get install -y python3 python3-dev tesseract-ocr libtesseract-dev libleptonica-dev python3-pip git virtualenv
+install: 
+  - pip install yara-python
+  - pip install pillow
+  - pip install cython
+  - pip install tesserocr
+  - pip install pytest
+  - pip install -r requirements.txt
 # command to run tests
 script: pytest  
