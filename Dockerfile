@@ -9,5 +9,6 @@ RUN pip3 install pillow
 RUN pip3 install cython
 RUN pip3 install tesserocr
 RUN pip3 install pytest
+RUN pip3 install -r requirements.txt
 WORKDIR /root
 
