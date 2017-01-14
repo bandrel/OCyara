@@ -16,8 +16,7 @@ python:
   - "3.7-dev" # 3.7 development branch
   - "nightly" # currently points to 3.7-dev
 before_install:
-  - docker pull bandrel/ocyara:latest
-  - docker build -t bandrel/ocyara:latest .
+  - docker build -t bandrel/ocyara .
 # command to install dependencies
 install: "pip install -r requirements.txt"
 # command to run tests
