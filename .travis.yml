@@ -6,7 +6,7 @@ python:
   - "3.5"
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y python3-dev tesseract-ocr libtesseract-dev libleptonica-dev libtesseract3
+  - sudo apt-get install -y cython3 cython python3-dev tesseract-ocr libtesseract-dev libleptonica-dev libtesseract3
 install: 
   - pip install yara-python
   - pip install pillow
