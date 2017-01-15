@@ -1,8 +1,8 @@
 #!/usr/env python3
 from ocyara import OCyara
 
-ocy = OCyara('Example.pdf')
-ocy.run('example.yara')
+ocy = OCyara('tests/Example.pdf')
+ocy.run('tests/example.yara')
 
 
 def num_unique_rule_matches():
