@@ -11,7 +11,7 @@ install:
   - pip install yara-python
   - pip install pillow
   - pip install cython
-  - pip install tesserocr
+  - CPPFLAGS=-I/usr/local/include pip3 install tesserocr
   - pip install pytest
   - pip install -r requirements.txt
 # command to run tests
