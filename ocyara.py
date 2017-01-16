@@ -48,10 +48,9 @@ class OCyara:
         self.total_added_to_queue = self.manager.list([0])
         self.tempdir = tempfile.TemporaryDirectory()
 
-    def __repr__(self):
-        """Return a list of matches when the class object is directly referenced"""
-        for rulename in self.list_rules():
-            self.list_matches(rulename)
+    # def __call__(self):
+    #     for rule in self.list_rules():
+    #         self.list_matches(rule)
 
     def run(self, yara_rule, auto_join=True):
         """
@@ -216,4 +215,3 @@ if __name__ == '__main__':
         for k,v in ocy.list_matches(rule).items():
             for i in v:
                 print(rule, i)
-

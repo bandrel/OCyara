@@ -1,4 +1,5 @@
 # OCyara
+[![Build Status](https://travis-ci.org/bandrel/OCyara.svg?branch=master)](https://travis-ci.org/bandrel/OCyara)
 
 The OCyara module performs OCR (Optical Character Recognition) on image
 files and scans them for matches to Yara rules.  OCyara also can process
