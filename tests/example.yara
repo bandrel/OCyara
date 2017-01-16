@@ -63,3 +63,11 @@ rule JCB
     condition:
        $jcb
 }
+
+rule Bogus
+{
+    strings:
+      $elephant = "Elephant" // just an dummy rule, that should not match in the examples
+    condition:
+      $elephant
+}
