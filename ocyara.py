@@ -17,7 +17,7 @@ class OCyara:
 
     OCyara also can process images embedded in PDF files.
     """
-    def __init__(self, path, recursive=False, worker_count=cpu_count() * 2):
+    def __init__(self, path: str, recursive=False, worker_count=cpu_count() * 2) -> None:
         """
         Create an OCyara object that can scan the specified directory or file and store the results.
 
@@ -48,7 +48,7 @@ class OCyara:
         self.total_added_to_queue = self.manager.list([0])
         self.tempdir = tempfile.TemporaryDirectory()
 
-    def run(self, yara_rule, auto_join=True):
+    def run(self, yara_rule: str, auto_join=True) -> None:
         """
         Begin multithreaded processing of path files with the specified rule file.
 
@@ -94,28 +94,29 @@ class OCyara:
         if auto_join:
             self.join()
 
-    def join(self):
+    def join(self) -> None:
         """Join the main thread to the scan queue and wait for workers to complete before proceding."""
         self.q.join()
         for worker in self.workers:
             worker.join()
 
-    def list_matches(self, rulename):
+    def list_matches(self, rulename: str) -> dict:
         """Find scanned files that matched the specified rule and return them in a dictionary."""
+        rulename
         files = []
         for filepath, matchedrule in self.matchedfiles[0].items():
             if rulename in matchedrule:
                 files.append(filepath)
         return dict(rule=files)
 
-    def list_rules(self):
+    def list_rules(self) -> list:
         """Process the matchedfiles dictionary and return a list of rules that were matched."""
         rules = set()
         for filepath, matchedrules in self.matchedfiles[0].items():
             [rules.add(matchedrule) for matchedrule in matchedrules]
         return rules
 
-    def _process_image(self, yara_rule):
+    def _process_image(self, yara_rule: str) -> None:
         """
         Perform OCR and yara rule matching as a worker.
 
@@ -149,7 +150,7 @@ class OCyara:
                     self.matchedfiles[0] = local_results_dict
             self.q.task_done()
 
-    def _pdf_extract(self, pdffile):
+    def _pdf_extract(self, pdffile: str) -> None:
         """
         Extract jpg images from pdf files and save them to temp directory.
 
@@ -197,7 +198,7 @@ class OCyara:
         print(ocy.yara_output)
 
     @property
-    def yara_output(self):
+    def yara_output(self) -> str:
         """Returns an the same output format as the standard yara program.
         RuleName FileName
         Where:
@@ -222,4 +223,3 @@ if __name__ == '__main__':
     ocy = OCyara(args.TARGET_FILES)
     ocy.run(args.YARA_RULES_FILE)
     ocy()
-
