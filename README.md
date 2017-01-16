@@ -34,7 +34,6 @@ installed:
  - **cython** (>=0.25.2) A compiler for writing C extensions for the
    Python language. Used by the tesserocr python module.
    https://pypi.python.org/pypi/Cython/
-
  - **tesserocr** (>=2.1.3) A Python wrapper for the tesseract-ocr API
    Run `pip install tesserocr` to install manually.
    https://github.com/sirfz/tesserocr
