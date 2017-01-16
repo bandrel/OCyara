@@ -11,19 +11,29 @@ from PIL import Image
 import argparse
 
 
-
-
 class OCyara:
     """
-    Whole Class doc string
-    """
+    Performs OCR (Optical Character Recognition) on image files and scans for matches to Yara rules.
 
-    def __init__(self, path, recursive=False, threads=cpu_count() * 2):
+    OCyara also can process images embedded in PDF files.
+    """
+    def __init__(self, path, recursive=False, worker_count=cpu_count() * 2):
+        """
+        Create an OCyara object that can scan the specified directory or file and store the results.
+
+        Arguments:
+            path -- File or directory to be processed
+
+        Keyword Arguments:
+            recursive -- Whether the specified path should be recursivly searched for images (default False)
+            worker_count -- The number of worker processes that should be spawned when
+              run() is executed (default availble CPUcores * 2)
+        """
         self.path = path
         self.recursive = recursive
         self.q = JoinableQueue()
         self.results = {}
-        self.threads = threads
+        self.threads = worker_count
         self.lock = Lock()
         self.workers = []
         if os.path.isdir(self.path):
@@ -39,14 +49,23 @@ class OCyara:
         self.tempdir = tempfile.TemporaryDirectory()
 
     def __repr__(self):
-        for rule in self.list_rules():
-            self.list_matches(rule)
+        """Return a list of matches when the class object is directly referenced"""
+        for rulename in self.list_rules():
+            self.list_matches(rulename)
 
     def run(self, yara_rule, auto_join=True):
-        """ Begin multithreaded processing of path files.
-        If auto_join is set to True the main process will stall until all of the worker processes have completed
-        their work. If auto_join is set to False the main process must use the .join() method before exiting the main
-         proccess because it will be possible for the main process to finish before the worker processes do."""
+        """
+        Begin multithreaded processing of path files with the specified rule file.
+
+        Arguments:
+            yara_rule -- A string file path of a Yara rule file
+
+        Keyword Arguments:
+            auto_join -- If set to True, the main process will stall until all the
+              worker processes have completed their work. If set to False, join()
+              must be manually called following run() to ensure the queue is
+              cleared and all workers have terminated.
+        """
 
         # Populate the queue with work
         if type(self.path) == str:
@@ -61,7 +80,7 @@ class OCyara:
             self.total_items_to_queue[0] = len(items_to_queue)
             # Create and run the workers
             for i in range(self.threads):
-                p = Process(target=self.process_image, args=(yara_rule,))
+                p = Process(target=self._process_image, args=(yara_rule,))
                 # p = Process(target=print, args=[yara_rule])
                 self.workers.append(p)
                 p.start()
@@ -69,7 +88,7 @@ class OCyara:
             for filepath in items_to_queue:
                 # Strip jpegs from PDF files and add them to the queue
                 if filepath.split('.')[-1].upper() == 'PDF':
-                    self.pdf_extract(filepath)
+                    self._pdf_extract(filepath)
                     for jpg_file in glob.glob(self.tempdir.name+'/*.jpg'):
                         self.total_items_to_queue[0] += 1
                         self.q.put([Image.open(jpg_file), filepath])
@@ -85,25 +104,36 @@ class OCyara:
             self.join()
 
     def join(self):
+        """Join the main thread to the scan queue and wait for workers to complete before proceding."""
         self.q.join()
-        for p in self.workers:
-            p.join()
+        for worker in self.workers:
+            worker.join()
 
-    def list_matches(self, rule):
+    def list_matches(self, rulename):
+        """Find scanned files that matched the specified rule and return them in a dictionary."""
         files = []
-        for k, v in self.matchedfiles[0].items():
-            if rule in v:
-                files.append(k)
+        for filepath, matchedrule in self.matchedfiles[0].items():
+            if rulename in matchedrule:
+                files.append(filepath)
         return dict(rule=files)
 
     def list_rules(self):
+        """Process the matchedfiles dictionary and return a list of rules that were matched."""
         rules = set()
-        for k, v in self.matchedfiles[0].items():
-            [rules.add(i) for i in v]
+        for filepath, matchedrules in self.matchedfiles[0].items():
+            [rules.add(matchedrule) for matchedrule in matchedrules]
         return rules
 
-    def process_image(self, yara_rule):
-        """ Worker function """
+    def _process_image(self, yara_rule):
+        """
+        Perform OCR and yara rule matching as a worker.
+
+        process_image() is used by the run() method to create multiple worker processes for
+        parallel execution.  process_image normally will not be called directly.
+
+        Arguments:
+            yara_rule -- File path pointing to a Yara rule file
+        """
         while True:
             try:
                 image, filepath = self.q.get(timeout=.25)
@@ -128,7 +158,16 @@ class OCyara:
                     self.matchedfiles[0] = local_results_dict
             self.q.task_done()
 
-    def pdf_extract(self,pdffile):
+    def _pdf_extract(self, pdffile):
+        """
+        Extract jpg images from pdf files and save them to temp directory.
+
+        pdf_extract is used by the run() method and not be called directly in most
+        circumstances.
+
+        Arguments:
+            pdffile -- A string file path pointing to a PDF
+        """
         with open(pdffile, "rb") as file:
             pdf = file.read()
 
@@ -176,5 +215,5 @@ if __name__ == '__main__':
     for rule in ocy.list_rules():
         for k,v in ocy.list_matches(rule).items():
             for i in v:
-                print(rule,i)
+                print(rule, i)
 
