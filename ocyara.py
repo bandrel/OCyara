@@ -48,10 +48,6 @@ class OCyara:
 
         # Populate the queue with work
         if type(self.path) == str:
-            # r1 = yara.compile(source='rule pdf { '
-            #                          '  condition: magic.type() contains “PDF”'
-            #                          '} rule jpg { '
-            #                          '  condition: magic.type() contains “JPG”}')
             all_files = glob.glob(self.path, recursive=self.recursive)
             # items_to_queue = r1.matches(data=all_files)
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
@@ -160,6 +156,24 @@ class OCyara:
             njpg += 1
             i = iend
 
+    def __call__(self):
+        """Default call which outputs the results with the same output standard as the regular yara program """
+        print(ocy.yara_output)
+
+    @property
+    def yara_output(self):
+        """Returns an the same output format as the standard yara program.
+        RuleName FileName
+        Where:
+          RuleName is the name of the rule that was matched
+          FileName is the name of the file name the match was found in"""
+        output_text = ''
+        for rule in ocy.list_rules():
+            for k, v in ocy.list_matches(rule).items():
+                for i in v:
+                    output_text += rule+' '+i+'\n'
+        return output_text
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Use OCR to scan jpg, png or images imbedded in PDF documents')
@@ -168,9 +182,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     ocy = OCyara(args.FILE)
     ocy.run(args.RULES_FILE)
-    for rule in ocy.list_rules():
-        for k,v in ocy.list_matches(rule).items():
-            for i in v:
-                print(rule,i)
-
+    ocy()
 
