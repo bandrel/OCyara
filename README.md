@@ -9,7 +9,7 @@ https://virustotal.github.io/yara/.
 ## Installation
 ### Operating System Requirements
 
-- **Python 3.x**
+- **Python 3.5+**
 - **Debian-based Linux distros** are currently the only supported
   operating systems. Testing has only been performed against Kali
   Rolling, but Ubuntu and other Debian-based distros should work as
