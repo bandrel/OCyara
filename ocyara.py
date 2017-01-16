@@ -207,11 +207,11 @@ if __name__ == '__main__':
                                                  '(https://virustotal.github.io/yara/). OCyara also can process images '
                                                  'embedded in PDF files.')
     parser.add_argument('YARA_RULES_FILE', type=str, help='Path of file containing yara rules')
-    parser.add_argument('TARGET_FILE/S', type=str, help='Directory or file name of images to scan.')
+    parser.add_argument('TARGET_FILES', type=str, help='Directory or file name of images to scan.')
     args = parser.parse_args()
-    ocy = OCyara(args.FILE)
-    ocy.run(args.RULES_FILE)
+    ocy = OCyara(args.TARGET_FILES)
+    ocy.run(args.YARA_RULES_FILE)
     for rule in ocy.list_rules():
-        for k,v in ocy.list_matches(rule).items():
+        for k, v in ocy.list_matches(rule).items():
             for i in v:
                 print(rule, i)
