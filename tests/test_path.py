@@ -1,7 +1,7 @@
 #!/usr/env python3
 from ocyara import OCyara
 
-ocy = OCyara('tests/Example.pdf')
+ocy = OCyara('tests/')
 ocy.run('tests/example.yara')
 
 
@@ -22,8 +22,8 @@ def test_example_pdf_rules():
                                 'MasterCard',
                                 'Discover'
                                 }
-
-
 def test_dict_matches():
-    assert ocy.matchedfiles[0] == {'tests/Example.pdf': ['SSN','credit_card', 'card', 'Visa', 'MasterCard',
+    assert ocy.matchedfiles[0] == {'tests/SSN-example.png': ['SSN'],
+                                   'tests/Example.pdf': ['SSN','credit_card', 'card', 'Visa', 'MasterCard',
                                                          'American_Express', 'Diners_Club', 'Discover', 'JCB']}
+
