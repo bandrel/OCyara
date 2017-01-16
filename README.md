@@ -17,7 +17,8 @@ https://virustotal.github.io/yara/.
   To install Tesseract:
 
   1. Install python3 header files: `apt-get install python3-dev`
-  2. `apt-get install tesseract-ocr libtesseract-dev libleptonica-dev`
+  2. Install Tesseract and its required libraries:
+     `apt-get install tesseract-ocr libtesseract-dev libleptonica-dev`
 
 
 
@@ -47,9 +48,17 @@ OCyara is not primarily intended to be used from the command line, but
 basic cli capablilities have been implemented to allow for
 easily-approachble testing of the library's core functionality.
 
-### OCyara Class Usage
+### OCyara Class Usage Examples
 
-### CLI usage
+```python
+# Scan the current directory for
+from ocyara import OCyara
+
+test = OCyara('./')
+test.run('rulefile.yara')
+print(test.list_matches('services'))
+```
+### CLI usage Example
 
 
 ```
