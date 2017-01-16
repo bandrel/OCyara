@@ -36,10 +36,6 @@ class OCyara:
         self.total_added_to_queue = self.manager.list([0])
         self.tempdir = tempfile.TemporaryDirectory()
 
-    # def __call__(self):
-    #     for rule in self.list_rules():
-    #         self.list_matches(rule)
-
     def run(self, yara_rule, auto_join=True):
         """ Begin multithreaded processing of path files.
         If auto_join is set to True the main process will stall until all of the worker processes have completed
