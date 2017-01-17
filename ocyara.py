@@ -2,6 +2,7 @@
 import glob
 import io
 import os
+from time import sleep
 import tesserocr
 import yara
 from multiprocessing import Process, JoinableQueue, Lock, Manager, cpu_count
@@ -9,6 +10,7 @@ from queue import Empty
 import tempfile
 from PIL import Image
 import argparse
+from tqdm import tqdm
 
 
 class OCyara:
@@ -46,6 +48,7 @@ class OCyara:
         self.matchedfiles.append({})
         self.total_items_to_queue = self.manager.list([0])
         self.total_added_to_queue = self.manager.list([0])
+        self.queue_items_completed = self.manager.list([0])
         self.tempdir = tempfile.TemporaryDirectory()
 
     def run(self, yara_rule: str, auto_join=True) -> None:
@@ -75,7 +78,7 @@ class OCyara:
                 # p = Process(target=print, args=[yara_rule])
                 self.workers.append(p)
                 p.start()
-            # add items to queue for processing
+            # Add items to queue for processing
             for filepath in items_to_queue:
                 # Strip jpegs from PDF files and add them to the queue
                 if filepath.split('.')[-1].upper() == 'PDF':
@@ -94,8 +97,21 @@ class OCyara:
         if auto_join:
             self.join()
 
-    def join(self) -> None:
-        """Join the main thread to the scan queue and wait for workers to complete before proceding."""
+    def show_progress(self) -> None:
+        """Generate a progress bar based on the number of items remaining in queue."""
+        previous_queue_items_completed = 0
+        with tqdm(total=self.total_added_to_queue[0], desc='Processing Images', unit='Image') as progressbar:
+            while True:
+                difference = self.queue_items_completed[0] - previous_queue_items_completed
+                previous_queue_items_completed = self.queue_items_completed[0]
+                progressbar.update(difference)
+                if self.queue_items_completed[0] == self.total_added_to_queue[0]:
+                    break
+                sleep(.25)
+
+    def join(self, showprogress=True):
+        if showprogress:
+            self.show_progress()
         self.q.join()
         for worker in self.workers:
             worker.join()
@@ -148,6 +164,7 @@ class OCyara:
                         except KeyError:
                             local_results_dict[filepath] = [x.rule]
                     self.matchedfiles[0] = local_results_dict
+            self.queue_items_completed[0] += 1
             self.q.task_done()
 
     def _pdf_extract(self, pdffile: str) -> None:
