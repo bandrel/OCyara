@@ -80,7 +80,7 @@ class OCyara:
     def show_progress(self) -> None:
         """Generate a progress bar based on the number of items remaining in queue."""
         previous_queue_items_completed = 0
-        with tqdm(total=self.total_added_to_queue[0]) as progressbar:
+        with tqdm(total=self.total_added_to_queue[0], desc='Processing Images', unit='Image') as progressbar:
             while True:
                 difference = self.queue_items_completed[0] - previous_queue_items_completed
                 previous_queue_items_completed = self.queue_items_completed[0]
