@@ -1,3 +1,3 @@
-OCyara
+cython
 tesserocr>=2.1.3
 yara-python>=3.5.0
