@@ -27,8 +27,6 @@ before_install:
     - LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include" make
     - sudo make install && sudo ldconfig
     - cd ..
-    - wget https://github.com/tesseract-ocr/tessdata/archive/3.04.00.tar.gz -O /tmp/tessdata.tar.gz
-    - tar -xvf /tmp/tessdata.tar.gz 
     - sudo mkdir -p /usr/local/share/tessdata/
     - sudo rsync -a tessdata-3.04.00/ /usr/local/share/tessdata
     - cd /home/travis/build/bandrel/OCyara
@@ -39,5 +37,6 @@ install:
     - pip install yara-python
     - pip install tesserocr
     - pip install tqdm
+    - python setup.py install
 # command to run tests
 script: pytest  
