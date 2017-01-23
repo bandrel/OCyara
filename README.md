@@ -12,14 +12,16 @@ https://virustotal.github.io/yara/.
 - **Python 3.5+**
 - **Debian-based Linux distros** are currently the only supported
   operating systems. Testing has only been performed against Kali
-  Rolling, but Ubuntu and other Debian-based distros should work as
+  Rolling and Ubuntu 16.04. Other Debian-based distros may work as
   well.
 - **Tesseract OCR API**
   To install Tesseract:
 
+  1. `apt-get update`
   1. Install python3 header files: `apt-get install python3-dev`
   2. Install Tesseract and its required libraries:
-     `apt-get install tesseract-ocr libtesseract-dev libleptonica-dev`
+     `apt-get install tesseract-ocr libtesseract-dev libleptonica-dev
+     libpng12-dev libjpeg62-dev libtiff5-dev zlib1g-dev`
 
 
 
@@ -27,6 +29,8 @@ https://virustotal.github.io/yara/.
 The easiest way to install OCyara is through the use of pip:
 
   1. Ensure all the Operating System Requirements listed above have been met
+  3. Run `pip install cython` (has to be installed separate like this
+     due to cython currently lacking a "install_requires")
   2. Run `pip install ocyara`
 
 Along with OCyara, the following other packages will be automatically
@@ -35,7 +39,6 @@ installed:
    Python language. Used by the tesserocr python module.
    https://pypi.python.org/pypi/Cython/
  - **tesserocr** (>=2.1.3) A Python wrapper for the tesseract-ocr API
-   Run `pip install tesserocr` to install manually.
    https://github.com/sirfz/tesserocr
  - **yara-python** (>=3.5.0) The Python interface for YARA
    https://github.com/VirusTotal/yara-python
@@ -45,9 +48,6 @@ installed:
 
 ## Usage
 
-OCyara is not primarily intended to be used from the command line, but
-basic cli capablilities have been implemented to allow for
-easily-approachble testing of the library's core functionality.
 
 ### OCyara Class Usage Examples
 
@@ -79,7 +79,9 @@ Each line printed has the rule that was matched and the file that
 matched it.
 
 ### CLI usage Example
-
+OCyara is not primarily intended to be used from the command line, but
+basic cli capablilities have been implemented to allow for
+easily-approachble testing of the library's core functionality.
 
 ```
 usage: ocyara.py [-h] YARA_RULES_FILE TARGET_FILE/S`
