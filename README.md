@@ -41,6 +41,8 @@ installed:
    https://github.com/VirusTotal/yara-python
  - **pillow** (>=4.0.0) Python Imaging Library fork
    https://github.com/python-pillow/Pillow
+ - **tqdm** A fast, extensible progress bar for Python and CLI
+   https://github.com/tqdm/tqdm
 
 
 ## Usage
