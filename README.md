@@ -30,7 +30,7 @@ The easiest way to install OCyara is through the use of pip:
 
   1. Ensure all the Operating System Requirements listed above have been met
   3. Run `pip install cython` (has to be installed separate like this
-     due to cython currently lacking a "install_requires")
+     due to cython currently lacking an "install_requires")
   2. Run `pip install ocyara`
 
 Along with OCyara, the following other packages will be automatically
