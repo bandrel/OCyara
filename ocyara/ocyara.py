@@ -11,6 +11,9 @@ import tempfile
 from PIL import Image
 import argparse
 from tqdm import tqdm
+import colorlog
+
+
 
 
 class OCyara:
@@ -19,7 +22,7 @@ class OCyara:
 
     OCyara also can process images embedded in PDF files.
     """
-    def __init__(self, path: str, recursive=False, worker_count=cpu_count() * 2) -> None:
+    def __init__(self, path: str, recursive=False, worker_count=cpu_count() * 2, verbose=False) -> None:
         """
         Create an OCyara object that can scan the specified directory or file and store the results.
 
@@ -50,6 +53,13 @@ class OCyara:
         self.total_added_to_queue = self.manager.list([0])
         self.queue_items_completed = self.manager.list([0])
         self.tempdir = tempfile.TemporaryDirectory()
+        self.verbose_output = verbose
+        handler = colorlog.StreamHandler()
+        handler.setFormatter(colorlog.ColoredFormatter(
+                '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
+
+        self.logger = colorlog.getLogger('OCyara')
+        self.logger.addHandler(handler)
 
     def run(self, yara_rule: str, auto_join=True) -> None:
         """
@@ -67,15 +77,23 @@ class OCyara:
 
         # Populate the queue with work
         if type(self.path) == str:
+            if self.verbose_output:
+                self.logger.debug('[*] Input file detected as a path')
             all_files = glob.glob(self.path, recursive=self.recursive)
-            # items_to_queue = r1.matches(data=all_files)
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
             items_to_queue = [i for i in all_files if i.split('.')[-1] in ['png', 'jpg', 'pdf']]
             self.total_items_to_queue[0] = len(items_to_queue)
+            if self.verbose_output:
+                self.logger.debug('[*] %d items detected and will be added to the Queue' % self.total_items_to_queue[0])
             # Create and run the workers
+            if self.verbose_output:
+                self.logger.debug('[*] %d worker processes being generated to process images. from the queue'
+                                  % self.threads)
             for i in range(self.threads):
                 p = Process(target=self._process_image, args=(yara_rule,))
-                # p = Process(target=print, args=[yara_rule])
+                if self.verbose_output:
+                    self.logger.debug(
+                        '[*] PID %d created to proccess queue' % self.total_items_to_queue[0])
                 self.workers.append(p)
                 p.start()
             # Add items to queue for processing
@@ -147,8 +165,12 @@ class OCyara:
                 image, filepath = self.q.get(timeout=.25)
             except Empty:
                 if self.total_added_to_queue[0] == self.total_items_to_queue[0]:
+                    if self.verbose_output:
+                        self.logger.debug('[*] Queue Empty PID %d exiting'% os.getpid())
                     return
                 else:
+                    if self.verbose_output:
+                        self.logger.debug('[*] Queue still loading')
                     continue
             ocrtext = tesserocr.image_to_text(image)
             rules = yara.compile(yara_rule)
@@ -177,6 +199,8 @@ class OCyara:
         Arguments:
             pdffile -- A string file path pointing to a PDF
         """
+        if self.verbose_output:
+            self.logger.debug('[*] Opening %s and extracting JPG images'% pdffile)
         with open(pdffile, "rb") as file:
             pdf = file.read()
 
@@ -205,6 +229,8 @@ class OCyara:
             istart += startfix
             iend += endfix
             jpg = pdf[istart:iend]
+            if self.verbose_output:
+                self.logger.debug('[*] Creating temporary file '+self.tempdir.name + "/jpg%d.jpg" % njpg)
             with open(self.tempdir.name + "/jpg%d.jpg" % njpg, "wb") as jpgfile:
                 jpgfile.write(jpg)
             njpg += 1
@@ -236,7 +262,8 @@ if __name__ == '__main__':
                                                  'embedded in PDF files.')
     parser.add_argument('YARA_RULES_FILE', type=str, help='Path of file containing yara rules')
     parser.add_argument('TARGET_FILES', type=str, help='Directory or file name of images to scan.')
+    parser.add_argument('-v', type=bool, help='Enables verbose output',default=False)
     args = parser.parse_args()
-    ocy = OCyara(args.TARGET_FILES)
+    ocy = OCyara(args.TARGET_FILES,verbose=args.v)
     ocy.run(args.YARA_RULES_FILE)
     ocy()
