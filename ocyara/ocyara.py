@@ -12,6 +12,8 @@ from PIL import Image
 import argparse
 from tqdm import tqdm
 import colorlog
+import logging
+
 
 
 
@@ -57,9 +59,10 @@ class OCyara:
         handler = colorlog.StreamHandler()
         handler.setFormatter(colorlog.ColoredFormatter(
                 '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
-
         self.logger = colorlog.getLogger('OCyara')
         self.logger.addHandler(handler)
+        if self.verbose_output:
+            self.logger.setLevel('DEBUG')
 
     def run(self, yara_rule: str, auto_join=True) -> None:
         """
@@ -77,23 +80,18 @@ class OCyara:
 
         # Populate the queue with work
         if type(self.path) == str:
-            if self.verbose_output:
-                self.logger.debug('[*] Input file detected as a path')
+            self.logger.debug('[*] Input file detected as a path')
             all_files = glob.glob(self.path, recursive=self.recursive)
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
             items_to_queue = [i for i in all_files if i.split('.')[-1] in ['png', 'jpg', 'pdf']]
             self.total_items_to_queue[0] = len(items_to_queue)
-            if self.verbose_output:
-                self.logger.debug('[*] %d items detected and will be added to the Queue' % self.total_items_to_queue[0])
+            self.logger.debug('[*] %d items detected and will be added to the Queue' % self.total_items_to_queue[0])
             # Create and run the workers
-            if self.verbose_output:
-                self.logger.debug('[*] %d worker processes being generated to process images. from the queue'
-                                  % self.threads)
+            self.logger.debug('[*] {0} worker processes being generated to process images. from the '
+                                  'queue'.format(self.threads))
             for i in range(self.threads):
                 p = Process(target=self._process_image, args=(yara_rule,))
-                if self.verbose_output:
-                    self.logger.debug(
-                        '[*] PID %d created to proccess queue' % self.total_items_to_queue[0])
+                self.logger.debug('[*] PID %d created to proccess queue' % self.total_items_to_queue[0])
                 self.workers.append(p)
                 p.start()
             # Add items to queue for processing
@@ -160,17 +158,22 @@ class OCyara:
         Arguments:
             yara_rule -- File path pointing to a Yara rule file
         """
+        handler = colorlog.StreamHandler()
+        handler.setFormatter(colorlog.ColoredFormatter(
+                '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
+        worker_logger = colorlog.getLogger('worker_'+str(os.getpid()))
+        worker_logger.addHandler(handler)
+        if self.verbose_output:
+            worker_logger.setLevel('DEBUG')
         while True:
             try:
                 image, filepath = self.q.get(timeout=.25)
             except Empty:
                 if self.total_added_to_queue[0] == self.total_items_to_queue[0]:
-                    if self.verbose_output:
-                        self.logger.debug('[*] Queue Empty PID %d exiting'% os.getpid())
+                    worker_logger.debug('[*] Queue Empty PID %d exiting'% os.getpid())
                     return
                 else:
-                    if self.verbose_output:
-                        self.logger.debug('[*] Queue still loading')
+                    worker_logger.debug('[*] Queue still loading')
                     continue
             ocrtext = tesserocr.image_to_text(image)
             rules = yara.compile(yara_rule)
@@ -262,7 +265,7 @@ if __name__ == '__main__':
                                                  'embedded in PDF files.')
     parser.add_argument('YARA_RULES_FILE', type=str, help='Path of file containing yara rules')
     parser.add_argument('TARGET_FILES', type=str, help='Directory or file name of images to scan.')
-    parser.add_argument('-v', type=bool, help='Enables verbose output',default=False)
+    parser.add_argument('-v',action='store_true', help='Enables verbose output')
     args = parser.parse_args()
     ocy = OCyara(args.TARGET_FILES,verbose=args.v)
     ocy.run(args.YARA_RULES_FILE)
