@@ -11,6 +11,8 @@ import tempfile
 from PIL import Image
 import argparse
 from tqdm import tqdm
+import subprocess
+import re
 
 
 class OCyara:
@@ -51,7 +53,7 @@ class OCyara:
         self.queue_items_completed = self.manager.list([0])
         self.tempdir = tempfile.TemporaryDirectory()
 
-    def run(self, yara_rule: str, auto_join=True) -> None:
+    def run(self, yara_rule: str, auto_join=True, file_magic=False) -> None:
         """
         Begin multithreaded processing of path files with the specified rule file.
 
@@ -63,14 +65,24 @@ class OCyara:
               worker processes have completed their work. If set to False, join()
               must be manually called following run() to ensure the queue is
               cleared and all workers have terminated.
+
+            file_magic -- If file_magic is enabled, ocyara will examine the contents
+              of the target files to determine if they are an eligible image file
+              type. For example, a JPEG file named 'picture.txt' will be processed by
+              the OCR engine. file_magic uses the Linux "file" command.
         """
 
         # Populate the queue with work
         if type(self.path) == str:
             all_files = glob.glob(self.path, recursive=self.recursive)
-            # items_to_queue = r1.matches(data=all_files)
+            handled_types = ['png', 'jpg', 'pdf']
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
-            items_to_queue = [i for i in all_files if i.split('.')[-1] in ['png', 'jpg', 'pdf']]
+            if file_magic:
+                # Queue files base on file contents
+                items_to_queue = [filepath for filepath in all_files if self.check_file_type(filepath) in handled_types]
+            else:
+                # Queue files based on extension
+                items_to_queue = [filepath for filepath in all_files if filepath.split('.')[-1] in handled_types]
             self.total_items_to_queue[0] = len(items_to_queue)
             # Create and run the workers
             for i in range(self.threads):
@@ -209,6 +221,19 @@ class OCyara:
                 jpgfile.write(jpg)
             njpg += 1
             i = iend
+
+    @staticmethod
+    def check_file_type(path: str) -> str:
+        """
+        Use the Linux "file" command to determine a file's type based on contents
+        instead of file extension.
+
+        Arguments:
+            path -- A string file path to be processed
+        """
+        process = subprocess.run(['file', path], stdout=subprocess.PIPE)
+        filetype = re.search(r': (.*?) ', str(process.stdout)).groups()[0].lower()
+        return filetype
 
     def __call__(self):
         """Default call which outputs the results with the same output standard as the regular yara program """
