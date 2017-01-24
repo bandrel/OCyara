@@ -24,6 +24,7 @@ def test_example_pdf_rules():
                                 }
 def test_dict_matches():
     assert ocy.matchedfiles[0] == {'tests/SSN-example.png': ['SSN'],
+                                   'tests/SSN-example.jpg': ['SSN'],
                                    'tests/Example.pdf': ['SSN','credit_card', 'card', 'Visa', 'MasterCard',
                                                          'American_Express', 'Diners_Club', 'Discover', 'JCB']}
 
