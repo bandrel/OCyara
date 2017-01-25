@@ -34,6 +34,5 @@ before_install:
     - cd /home/travis/build/bandrel/OCyara
 install:
     - pip install Cython
-    - pip install ocyara
 # command to run tests
 script: pytest  
