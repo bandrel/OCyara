@@ -1,9 +1,7 @@
 # OCyara
 [![Build Status](https://travis-ci.org/bandrel/OCyara.svg?branch=master)](https://travis-ci.org/bandrel/OCyara)
 
-[![PyPI version](https://badge.fury.io/py/OCyara.svg)](https://badge.fury.io/py/OCyara)
-
-[![PyPI](https://img.shields.io/pypi/pyversions/ocyara.svg)]()
+[![PyPI version](https://badge.fury.io/py/OCyara.svg)](https://pypi.python.org/pypi/OCyara/)
 
 The OCyara module performs OCR (Optical Character Recognition) on image
 files and scans them for matches to Yara rules.  OCyara also can process
