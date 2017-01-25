@@ -32,8 +32,9 @@ class OCyara:
         Keyword Arguments:
             recursive -- Whether the specified path should be recursivly searched for images (default False)
             worker_count -- The number of worker processes that should be spawned when
-              run() is executed (default available CPU cores * 2)
-            verbose -- An int() from 0-2 that sets the verbosity level.  0 is default, 1 is information and 2 is debug
+                            run() is executed (default available CPU cores * 2)
+            verbose -- An int() from 0-2 that sets the verbosity level.
+                       0 is default, 1 is information and 2 is debug
         """
         self.path = path
         self.recursive = recursive
@@ -90,7 +91,7 @@ class OCyara:
             self.logger.info('{0} items detected and will be added to the Queue'.format(self.total_items_to_queue[0]))
             # Create and run the workers
             self.logger.info('{0} worker processes being generated to process images. from the '
-                                  'queue'.format(self.threads))
+                             'queue'.format(self.threads))
             for i in range(self.threads):
                 p = Process(target=self._process_image, args=(yara_rule,))
                 self.workers.append(p)
@@ -212,7 +213,6 @@ class OCyara:
         endmark = b"\xff\xd9"
         endfix = 2
         i = 0
-        pdf_images = []
         njpg = 0
         while True:
             istream = pdf.find(b"stream", i)
