@@ -3,6 +3,8 @@
 
 [![PyPI version](https://badge.fury.io/py/OCyara.svg)](https://badge.fury.io/py/OCyara)
 
+[![Coverage Status](https://coveralls.io/repos/github/bandrel/OCyara/badge.svg?branch=master)](https://coveralls.io/github/bandrel/OCyara?branch=master)
+
 The OCyara module performs OCR (Optical Character Recognition) on image
 files and scans them for matches to Yara rules.  OCyara also can process
 images embedded in PDF files. For more information about Yara, visit
