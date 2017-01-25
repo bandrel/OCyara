@@ -37,3 +37,6 @@ install:
     - pip install ocyara
 # command to run tests
 script: pytest  
+#update coveralls
+after_success:
+  coveralls
