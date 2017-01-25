@@ -32,6 +32,7 @@ before_install:
     - sudo mkdir -p /usr/local/share/tessdata/
     - sudo rsync -a tessdata-3.04.00/ /usr/local/share/tessdata
     - cd /home/travis/build/bandrel/OCyara
+    - ln -s ../ocyara/ocyara.py tests/ocyara.py
 install:
     - pip install Cython
 # command to run tests
