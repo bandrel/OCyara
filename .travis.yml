@@ -41,4 +41,6 @@ install:
     - pip install tqdm
     - pip install colorlog
 script: python -m pytest tests/
-# command to run tests
+#update coveralls
+after_success:
+  coveralls
