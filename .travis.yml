@@ -40,5 +40,6 @@ install:
     - pip install tesserocr
     - pip install tqdm
     - pip install colorlog
+    - pip install --upgrade pytest
 script: pytest
 # command to run tests
