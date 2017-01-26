@@ -16,6 +16,7 @@ before_install:
     - sudo apt-get install -y libpng12-dev
     - sudo apt-get install -y libjpeg62-dev
     - sudo apt-get install -y libtiff4-dev
+    - sudo apt-get install -y libgif-dev
     - sudo apt-get install -y zlib1g-dev
     - wget http://www.leptonica.org/source/leptonica-1.73.tar.gz -O /tmp/leptonica.tar.gz
     - tar -xvf /tmp/leptonica.tar.gz
