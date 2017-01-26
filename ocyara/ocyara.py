@@ -12,7 +12,6 @@ from PIL import Image
 import argparse
 from tqdm import tqdm
 import subprocess
-import re
 
 
 class OCyara:
@@ -231,9 +230,9 @@ class OCyara:
         Arguments:
             path -- A string file path to be processed
         """
-        process = subprocess.run(['file', path], stdout=subprocess.PIPE)
-        filetype = re.search(r': (.*?) ', str(process.stdout)).groups()[0].lower()
-        return filetype
+        process = subprocess.run(['file', '--mime-type', '-b', path], stdout=subprocess.PIPE)
+        filemimetype = process.stdout.decode("utf-8").strip()
+        return filemimetype
 
     def __call__(self):
         """Default call which outputs the results with the same output standard as the regular yara program """
