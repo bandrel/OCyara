@@ -130,8 +130,7 @@ class OCyara:
                         self.q.put([Image.open(filepath), filepath])
                         self.total_added_to_queue[0] += 1
                     except OSError:
-                        # todo update this to use logging warnings
-                        print('Warning: {0} is not a proper image file'.format(filepath))
+                        self.logger.warning('Warning: {0} is not a proper image file'.format(filepath))
                         self.total_items_to_queue[0] -= 1
         elif type(self.path) == io.BufferedReader:
             self.q.put(Image.open(self.path))
@@ -166,7 +165,7 @@ class OCyara:
                 files.append(filepath)
         return dict(rule=files)
 
-    def list_rules(self) -> list:
+    def list_rules(self) -> set:
         """Process the matchedfiles dictionary and return a list of rules that were matched."""
         rules = set()
         for filepath, matchedrules in self.matchedfiles[0].items():
@@ -304,6 +303,6 @@ if __name__ == '__main__':
     parser.add_argument('-v', action='count', help='Enables verbose output, -v for verbose or -vv for very verbose',
                         default=0)
     args = parser.parse_args()
-    ocy = OCyara(args.TARGET_FILES,verbose=args.v)
+    ocy = OCyara(args.TARGET_FILES, verbose=args.v)
     ocy.run(args.YARA_RULES_FILE)
     ocy()
