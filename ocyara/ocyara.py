@@ -74,14 +74,21 @@ class OCyara:
         # Populate the queue with work
         if type(self.path) == str:
             all_files = glob.glob(self.path, recursive=self.recursive)
-            handled_types = ['png', 'jpg', 'pdf']
+            handled_file_extensions = ['png', 'jpg', 'jpeg', 'pdf', 'gif', 'bmp']
+            handled_mime_types = [
+                'image/png', 'image/jpeg', 'application/pdf', 'image/gif', 'image/x-ms-bmp'
+            ]
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
             if file_magic:
                 # Queue files base on file contents
-                items_to_queue = [filepath for filepath in all_files if self.check_file_type(filepath) in handled_types]
+                items_to_queue = [
+                    filepath for filepath in all_files if self.check_file_type(filepath) in handled_mime_types
+                ]
             else:
                 # Queue files based on extension
-                items_to_queue = [filepath for filepath in all_files if filepath.split('.')[-1] in handled_types]
+                items_to_queue = [
+                    filepath for filepath in all_files if filepath.split('.')[-1] in handled_file_extensions
+                ]
             self.total_items_to_queue[0] = len(items_to_queue)
             # Create and run the workers
             for i in range(self.threads):
@@ -100,8 +107,13 @@ class OCyara:
                         self.total_added_to_queue[0] += 1
                     self.total_items_to_queue[0] -= 1  # Negate PNG file itself (vs jpegs) being added earlier
                 else:
-                    self.q.put([Image.open(filepath), filepath])
-                    self.total_added_to_queue[0] += 1
+                    try:
+                        self.q.put([Image.open(filepath), filepath])
+                        self.total_added_to_queue[0] += 1
+                    except OSError:
+                        # todo update this to use logging warnings
+                        print('Warning: {0} is not a proper image file'.format(filepath))
+                        self.total_items_to_queue[0] -= 1
         elif type(self.path) == io.BufferedReader:
             self.q.put(Image.open(self.path))
             self.total_added_to_queue[0] += 1
