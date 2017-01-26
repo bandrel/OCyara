@@ -1,6 +1,8 @@
 # OCyara
 [![Build Status](https://travis-ci.org/bandrel/OCyara.svg?branch=master)](https://travis-ci.org/bandrel/OCyara)
 
+[![PyPI version](https://badge.fury.io/py/OCyara.svg)](https://pypi.python.org/pypi/OCyara/)
+
 The OCyara module performs OCR (Optical Character Recognition) on image
 files and scans them for matches to Yara rules.  OCyara also can process
 images embedded in PDF files. For more information about Yara, visit
@@ -28,7 +30,8 @@ https://virustotal.github.io/yara/.
 ### Install Procedure
 The easiest way to install OCyara is through the use of pip:
 
-  1. Ensure all the Operating System Requirements listed above have been met
+  1. Ensure all the Operating System Requirements listed above have been
+     met
   3. Run `pip install cython` (has to be installed separate like this
      due to tesserocr currently lacking an "install_requires")
   2. Run `pip install ocyara`
@@ -46,6 +49,9 @@ installed:
    https://github.com/python-pillow/Pillow
  - **tqdm** A fast, extensible progress bar for Python and CLI
    https://github.com/tqdm/tqdm
+ - **colorlog**
+   A colored formatter for the python logging module
+   http://pypi.python.org/pypi/colorlog
 
 
 ## Usage
@@ -116,7 +122,9 @@ class OCyara(builtins.object)
  |      Keyword Arguments:
  |          recursive -- Whether the specified path should be recursivly searched for images (default False)
  |          worker_count -- The number of worker processes that should be spawned when
- |            run() is executed (default availble CPUcores * 2)
+ |                          run() is executed (default available CPU cores * 2)
+ |          verbose -- An int() from 0-2 that sets the verbosity level.
+ |                     0 is default, 1 is information and 2 is debug
  |
  |  __repr__(self)
  |      Return a list of matches when the class object is directly referenced
