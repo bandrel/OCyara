@@ -284,7 +284,7 @@ class OCyara:
         RuleName FileName
         Where:
           RuleName is the name of the rule that was matched
-          FileName is the name of the file name the match was found in"""
+          FileName is the name of the file in which the match was found"""
         output_text = ''
         for rule in ocy.list_rules():
             for k, v in ocy.list_matches(rule).items():
