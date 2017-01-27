@@ -113,7 +113,10 @@ class OCyara(builtins.object)
  |
  |  Methods defined here:
  |
- |  __init__(self, path, recursive=False, worker_count=8)
+ |  __call__(self)
+ |      Default call which outputs the results with the same output standard as the regular yara program
+ |
+ |  __init__(self, path:str, recursive=False, worker_count=6, verbose=0) -> None
  |      Create an OCyara object that can scan the specified directory or file and store the results.
  |
  |      Arguments:
@@ -126,37 +129,15 @@ class OCyara(builtins.object)
  |          verbose -- An int() from 0-2 that sets the verbosity level.
  |                     0 is default, 1 is information and 2 is debug
  |
- |  __repr__(self)
- |      Return a list of matches when the class object is directly referenced
+ |  join(self, showprogress=True)
  |
- |  join(self)
- |      Join the main thread to the scan queue and wait for workers to complete before proceding.
- |
- |  list_matches(self, rulename)
+ |  list_matches(self, rulename:str) -> dict
  |      Find scanned files that matched the specified rule and return them in a dictionary.
  |
- |  list_rules(self)
+ |  list_rules(self) -> set
  |      Process the matchedfiles dictionary and return a list of rules that were matched.
  |
- |  pdf_extract(self, pdffile)
- |      Extract jpg images from pdf files and save them to temp directory.
- |
- |      pdf_extract is used by the run() method and not be called directly in most
- |      circumstances.
- |
- |      Arguments:
- |          pdffile -- A string file path pointing to a PDF
- |
- |  process_image(self, yara_rule)
- |      Perform OCR and yara rule matching as a worker.
- |
- |      process_image() is used by the run() method to create multiple worker processes for
- |      parallel execution.  process_image normally will not be called directly.
- |
- |      Arguments:
- |          yara_rule -- File path pointing to a Yara rule file
- |
- |  run(self, yara_rule, auto_join=True)
+ |  run(self, yara_rule:str, auto_join=True, file_magic=False) -> None
  |      Begin multithreaded processing of path files with the specified rule file.
  |
  |      Arguments:
@@ -167,4 +148,38 @@ class OCyara(builtins.object)
  |            worker processes have completed their work. If set to False, join()
  |            must be manually called following run() to ensure the queue is
  |            cleared and all workers have terminated.
+ |
+ |          file_magic -- If file_magic is enabled, ocyara will examine the contents
+ |            of the target files to determine if they are an eligible image file
+ |            type. For example, a JPEG file named 'picture.txt' will be processed by
+ |            the OCR engine. file_magic uses the Linux "file" command.
+ |
+ |  show_progress(self) -> None
+ |      Generate a progress bar based on the number of items remaining in queue.
+ |
+ |  ----------------------------------------------------------------------
+ |  Static methods defined here:
+ |
+ |  check_file_type(path:str) -> str
+ |      Use the Linux "file" command to determine a file's type based on contents
+ |      instead of file extension.
+ |
+ |      Arguments:
+ |          path -- A string file path to be processed
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+ |
+ |  yara_output
+ |      Returns an the same output format as the standard yara program.
+ |      RuleName FileName
+ |      Where:
+ |        RuleName is the name of the rule that was matched
+ |        FileName is the name of the file in which the match was found
 ```

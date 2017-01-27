@@ -13,6 +13,7 @@ from time import sleep
 import colorlog
 from PIL import Image
 from tqdm import tqdm
+import subprocess
 
 
 class OCyara:
@@ -67,7 +68,7 @@ class OCyara:
         else:
             self.logger.setLevel('WARN')
 
-    def run(self, yara_rule: str, auto_join=True) -> None:
+    def run(self, yara_rule: str, auto_join=True, file_magic=False) -> None:
         """
         Begin multithreaded processing of path files with the specified rule file.
 
@@ -79,14 +80,32 @@ class OCyara:
               worker processes have completed their work. If set to False, join()
               must be manually called following run() to ensure the queue is
               cleared and all workers have terminated.
+
+            file_magic -- If file_magic is enabled, ocyara will examine the contents
+              of the target files to determine if they are an eligible image file
+              type. For example, a JPEG file named 'picture.txt' will be processed by
+              the OCR engine. file_magic uses the Linux "file" command.
         """
 
         # Populate the queue with work
         if type(self.path) == str:
             self.logger.debug('Input file detected as a path')
             all_files = glob.glob(self.path, recursive=self.recursive)
+            handled_file_extensions = ['png', 'jpg', 'jpeg', 'pdf', 'gif', 'bmp']
+            handled_mime_types = [
+                'image/png', 'image/jpeg', 'application/pdf', 'image/gif', 'image/x-ms-bmp'
+            ]
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
-            items_to_queue = [i for i in all_files if i.split('.')[-1] in ['png', 'jpg', 'pdf']]
+            if file_magic:
+                # Queue files base on file contents
+                items_to_queue = [
+                    filepath for filepath in all_files if self.check_file_type(filepath) in handled_mime_types
+                ]
+            else:
+                # Queue files based on extension
+                items_to_queue = [
+                    filepath for filepath in all_files if filepath.split('.')[-1] in handled_file_extensions
+                ]
             self.total_items_to_queue[0] = len(items_to_queue)
             self.logger.info('{0} items detected and will be added to the Queue'.format(self.total_items_to_queue[0]))
             # Create and run the workers
@@ -107,8 +126,12 @@ class OCyara:
                         self.total_added_to_queue[0] += 1
                     self.total_items_to_queue[0] -= 1  # Negate PNG file itself (vs jpegs) being added earlier
                 else:
-                    self.q.put([Image.open(filepath), filepath])
-                    self.total_added_to_queue[0] += 1
+                    try:
+                        self.q.put([Image.open(filepath), filepath])
+                        self.total_added_to_queue[0] += 1
+                    except OSError:
+                        self.logger.warning('Warning: {0} is not a proper image file'.format(filepath))
+                        self.total_items_to_queue[0] -= 1
         elif type(self.path) == io.BufferedReader:
             self.q.put(Image.open(self.path))
             self.total_added_to_queue[0] += 1
@@ -142,7 +165,7 @@ class OCyara:
                 files.append(filepath)
         return dict(rule=files)
 
-    def list_rules(self) -> list:
+    def list_rules(self) -> set:
         """Process the matchedfiles dictionary and return a list of rules that were matched."""
         rules = set()
         for filepath, matchedrules in self.matchedfiles[0].items():
@@ -238,6 +261,19 @@ class OCyara:
             njpg += 1
             i = iend
 
+    @staticmethod
+    def check_file_type(path: str) -> str:
+        """
+        Use the Linux "file" command to determine a file's type based on contents
+        instead of file extension.
+
+        Arguments:
+            path -- A string file path to be processed
+        """
+        process = subprocess.run(['file', '--mime-type', '-b', path], stdout=subprocess.PIPE)
+        filemimetype = process.stdout.decode("utf-8").strip()
+        return filemimetype
+
     def __call__(self):
         """Default call which outputs the results with the same output standard as the regular yara program """
         print(ocy.yara_output)
@@ -248,7 +284,7 @@ class OCyara:
         RuleName FileName
         Where:
           RuleName is the name of the rule that was matched
-          FileName is the name of the file name the match was found in"""
+          FileName is the name of the file in which the match was found"""
         output_text = ''
         for rule in ocy.list_rules():
             for k, v in ocy.list_matches(rule).items():
@@ -267,6 +303,6 @@ if __name__ == '__main__':
     parser.add_argument('-v', action='count', help='Enables verbose output, -v for verbose or -vv for very verbose',
                         default=0)
     args = parser.parse_args()
-    ocy = OCyara(args.TARGET_FILES,verbose=args.v)
+    ocy = OCyara(args.TARGET_FILES, verbose=args.v)
     ocy.run(args.YARA_RULES_FILE)
     ocy()
