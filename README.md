@@ -13,9 +13,11 @@ https://virustotal.github.io/yara/.
 
 - **Python 3.5+**
 - **Debian-based Linux distros** are currently the only supported
-  operating systems. Testing has only been performed against Kali
-  Rolling and Ubuntu 16.04. Other Debian-based distros may work as
-  well.
+  operating systems. Installation has only been tested on Kali
+  Rolling and Ubuntu 16.10. (Other Debian-based distros may work as
+  well, but may require manual compilation of Tesseract and/or Leptonica
+  to get support for all image types. GIF, and TIFF library support
+  seems to be troublesome with some Ubuntu LTS installations.)
 - **Tesseract OCR API**
   To install Tesseract:
 
@@ -23,7 +25,7 @@ https://virustotal.github.io/yara/.
   1. Install python3 header files: `apt-get install python3-dev`
   2. Install Tesseract and its required libraries:
      `apt-get install tesseract-ocr libtesseract-dev libleptonica-dev
-     libpng12-dev libjpeg62-dev libtiff5-dev zlib1g-dev`
+      libpng12-dev libjpeg62-dev libtiff5-dev zlib1g-dev`
 
 
 
