@@ -15,10 +15,3 @@ install:
   - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
 script: 
   - docker exec travis bash -c "cd /home/OCyara && python3 -m pytest"
-matrix:
-  include:
-  - env: PYTHON_VERSION=latest
-  - env: PYTHON_VERSION=3.5
-  - env: PYTHON_VERSION=3.6
-  - env: PYTHON_VERSION=3.7
-  - env: PYTHON_VERSION=nightly
