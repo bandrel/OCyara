@@ -1,5 +1,6 @@
 sudo: required
 dist: trusty
+language: python
 services:
   - docker
 env:
@@ -15,8 +16,9 @@ env:
 script: 
   - docker exec travis bash -c "cd /home/OCyara && python3 -m pytest"
 matrix:
-  - PYTHON_VERSION=latest
-  - PYTHON_VERSION=3.5
-  - PYTHON_VERSION=3.6
-  - PYTHON_VERSION=3.7
-  - PYTHON_VERSION=nightly
+  include:
+  - env: PYTHON_VERSION=latest
+  - env: PYTHON_VERSION=3.5
+  - env: PYTHON_VERSION=3.6
+  - env: PYTHON_VERSION=3.7
+  - env: PYTHON_VERSION=nightly
