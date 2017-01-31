@@ -3,8 +3,12 @@ dist: trusty
 services:
   - docker
 env:
-  - PYTHON_VERSION
-install:
+  - PYTHON_VERSION=latest
+  - PYTHON_VERSION=3.5
+  - PYTHON_VERSION=3.6
+  - PYTHON_VERSION=3.7
+  - PYTHON_VERSION=nightly
+ install:
   - docker pull bandrel/ocyara:${PYTHON_VERSION}
   - docker run --name travis -dt bandrel/ocyara:${PYTHON_VERSION}
   - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
