@@ -20,6 +20,7 @@ install:
     - docker run --name travis -dt bandrel/ocyara:latest
     - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
     - docker exec travis bash -c "cd /home/OCyara"
+    - docker exec travis bash -c "apt-get -y install python3-pytest"
 script: 
   - docker exec travis bash -c "python3 -m pytest"
 matrix:
