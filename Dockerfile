@@ -9,8 +9,9 @@ RUN apt-get install -y python-pip
 RUN apt-get install -y python3
 RUN apt-get install -y virtualenv
 RUN apt-get install -y git
-RUN pip install --upgrade pip
+RUN pip3 install --upgrade pip
 RUN apt-get install -y wget
-RUN wget -O https://raw.githubusercontent.com/bandrel/OCyara/master/requirements.txt && pip3 install -r requirements.txt
+RUN pip3 install cython
+RUN wget -O requirements.txt https://raw.githubusercontent.com/bandrel/OCyara/master/requirements.txt && pip3 install -r requirements.txt
 RUN pip3 install pytest
 RUN git clone https://github.com/bandrel/OCyara.git
