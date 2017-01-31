@@ -2,26 +2,15 @@ sudo: required
 dist: trusty
 services:
   - docker
-env:
-  DOCKER_COMPOSE_VERSION: 1.5.0
-language: python
 
-before_install:
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
-install:  
-  - sed -e 's/${PYTHON_VERSION}/'${PYTHON_VERSION}/g -e 's/${DJANGO_VERSION}/'${DJANGO_VERSION}/g Dockerfile.tmpl  > Dockerfile
-  - docker-compose build
-  
 install:
-    - docker pull bandrel/ocyara:latest
+    - docker pull bandrel/ocyara:${PYTHON_VERSION}
     - docker run --name travis -dt bandrel/ocyara:latest
     - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
 script: 
   - docker exec travis bash -c "cd /home/OCyara && python3 -m pytest"
 matrix:
+  - PYTHON_VERSION=latest
   - PYTHON_VERSION=3.5
   - PYTHON_VERSION=3.5-dev
   - PYTHON_VERSION=3.6
