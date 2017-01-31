@@ -2,11 +2,12 @@ sudo: required
 dist: trusty
 services:
   - docker
-
+env:
+  - PYTHON_VERSION
 install:
-    - docker pull bandrel/ocyara:${PYTHON_VERSION}
-    - docker run --name travis -dt bandrel/ocyara:${PYTHON_VERSION}
-    - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
+  - docker pull bandrel/ocyara:${PYTHON_VERSION}
+  - docker run --name travis -dt bandrel/ocyara:${PYTHON_VERSION}
+  - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
 script: 
   - docker exec travis bash -c "cd /home/OCyara && python3 -m pytest"
 matrix:
