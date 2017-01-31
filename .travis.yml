@@ -12,9 +12,6 @@ script:
 matrix:
   - PYTHON_VERSION=latest
   - PYTHON_VERSION=3.5
-  - PYTHON_VERSION=3.5-dev
   - PYTHON_VERSION=3.6
-  - PYTHON_VERSION=3.6-dev
   - PYTHON_VERSION=3.7
-  - PYTHON_VERSION=3.7-dev
   - PYTHON_VERSION=nightly
