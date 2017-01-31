@@ -4,14 +4,11 @@ language: python
 services:
   - docker
 env:
-  - PYTHON_VERSION=latest
   - PYTHON_VERSION=3.5
   - PYTHON_VERSION=3.6
-  - PYTHON_VERSION=3.7
-  - PYTHON_VERSION=nightly
 install:
-  - docker pull bandrel/ocyara:${PYTHON_VERSION}
-  - docker run --name travis -dt bandrel/ocyara:${PYTHON_VERSION}
+  - docker pull bandrel/ocyara:latest
+  - docker run --name travis -dt bandrel/ocyara:latest
   - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
 script: 
-  - docker exec travis bash -c "cd /home/OCyara && python3 -m pytest"
+  - docker exec travis bash -c "source ${PYTHON_VERSION}/bin/activate cd /home/OCyara && python3 -m pytest"
