@@ -2,17 +2,19 @@ sudo: required
 dist: trusty
 services:
   - docker
-
+env:
+  DOCKER_COMPOSE_VERSION: 1.5.0
 language: python
 
-python:
-  - "3.5"
-  - "3.5-dev" # 3.5 development branch
-  - "3.6"
-  - "3.6-dev" # 3.6 development branch
-  - "3.7-dev" # 3.7 development branch
-  - "nightly" # currently points to 3.7-dev
-
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+install:  
+  - sed -e 's/${PYTHON_VERSION}/'${PYTHON_VERSION}/g -e 's/${DJANGO_VERSION}/'${DJANGO_VERSION}/g Dockerfile.tmpl  > Dockerfile
+  - docker-compose build
+  
 install:
     - docker pull bandrel/ocyara:latest
     - docker run --name travis -dt bandrel/ocyara:latest
@@ -21,3 +23,11 @@ install:
 
 script: 
   - docker exec travis bash -c "python3 -m pytest"
+matrix:
+  - PYTHON_VERSION=3.5
+  - PYTHON_VERSION=3.5-dev
+  - PYTHON_VERSION=3.6
+  - PYTHON_VERSION=3.6-dev
+  - PYTHON_VERSION=3.7
+  - PYTHON_VERSION=3.7-dev
+  - PYTHON_VERSION=nightly
