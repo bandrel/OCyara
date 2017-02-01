@@ -12,4 +12,4 @@ install:
   - docker cp /home/travis/build/bandrel/OCyara travis:/home # need to move this directory into the docker image for testing
 
 script: 
-  - docker exec travis bash -c "source ${PYTHON_VERSION}/bin/activate && cd /home/OCyara && python -m pytest"
+  - docker exec travis bash -c "source /home/${PYTHON_VERSION}/bin/activate && cd /home/OCyara && python -m pytest"
