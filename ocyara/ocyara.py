@@ -68,7 +68,8 @@ class OCyara:
         else:
             self.logger.setLevel('WARN')
 
-    def run(self, yara_rule: str, auto_join=True, file_magic=False) -> None:
+    def run(self, yara_rule: object, auto_join: object = True, file_magic: object = False,
+            include_context: object = False) -> object:
         """
         Begin multithreaded processing of path files with the specified rule file.
 
@@ -85,6 +86,10 @@ class OCyara:
               of the target files to determine if they are an eligible image file
               type. For example, a JPEG file named 'picture.txt' will be processed by
               the OCR engine. file_magic uses the Linux "file" command.
+
+            include_context -- If True, when a file matches a yara rule, the returned
+              results dictionary will also include the full ocr text of the matched
+              file. This text can be further processed by the user if needed.
         """
 
         # Populate the queue with work
@@ -165,11 +170,11 @@ class OCyara:
                 files.append(filepath)
         return dict(rule=files)
 
-    def list_rules(self) -> set:
+    def list_matched_rules(self) -> set:
         """Process the matchedfiles dictionary and return a list of rules that were matched."""
         rules = set()
         for filepath, matchedrules in self.matchedfiles[0].items():
-            [rules.add(matchedrule) for matchedrule in matchedrules]
+            [rules.add(matchedrule[0]) for matchedrule in matchedrules]
         return rules
 
     def _process_image(self, yara_rule: str) -> None:
@@ -182,6 +187,7 @@ class OCyara:
         Arguments:
             yara_rule -- File path pointing to a Yara rule file
         """
+        context = None
         handler = colorlog.StreamHandler()
         handler.setFormatter(colorlog.ColoredFormatter(
                 '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
@@ -203,16 +209,16 @@ class OCyara:
             ocrtext = tesserocr.image_to_text(image)
             rules = yara.compile(yara_rule)
             matches = rules.match(data=ocrtext)
-            # if there is a match store the filename and the rule in a dictionary local to this process
-            # Create an editable copy of the master manager dict
+            # If there is a match, store the filename and the rule in a dictionary local to this process.
+            # Create an editable copy of the master manager dict.
             with self.lock:
                 local_results_dict = self.matchedfiles[0]
                 if matches:
                     for x in matches:
                         try:
-                            local_results_dict[filepath].append(x.rule)
+                            local_results_dict[filepath].append((x.rule, context))
                         except KeyError:
-                            local_results_dict[filepath] = [x.rule]
+                            local_results_dict[filepath] = [(x.rule, context)]
                     self.matchedfiles[0] = local_results_dict
             self.queue_items_completed[0] += 1
             self.q.task_done()
@@ -286,7 +292,7 @@ class OCyara:
           RuleName is the name of the rule that was matched
           FileName is the name of the file in which the match was found"""
         output_text = ''
-        for rule in ocy.list_rules():
+        for rule in ocy.list_matched_rules():
             for k, v in ocy.list_matches(rule).items():
                 for i in v:
                     output_text += rule+' '+i+'\n'

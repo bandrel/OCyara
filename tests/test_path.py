@@ -1,12 +1,9 @@
 #!/usr/env python3
 from ocyara import OCyara
 
-ocy = OCyara('tests/')
-ocy.run('tests/example.yara')
-
 
 def num_unique_rule_matches():
-    return len(ocy.list_rules())
+    return len(ocy.list_matched_rules())
 
 
 def test_number_of_rules():
@@ -14,7 +11,7 @@ def test_number_of_rules():
 
 
 def test_example_pdf_rules():
-    assert ocy.list_rules() == {'card',
+    assert ocy.list_matched_rules() == {'card',
                                 'SSN',
                                 'credit_card',
                                 'JCB',
@@ -23,7 +20,7 @@ def test_example_pdf_rules():
                                 'American_Express',
                                 'MasterCard',
                                 'Discover'
-                                }
+                                        }
 
 
 def test_dict_matches():
@@ -32,7 +29,11 @@ def test_dict_matches():
     ]))
 
     assert findings == [
-        ['SSN'],
-        ['SSN'],
-        ['SSN', 'credit_card', 'card', 'Visa', 'MasterCard', 'American_Express', 'Diners_Club', 'Discover', 'JCB']
+        [('SSN', None)],
+        [('SSN', None)],
+        [('SSN', None), ('credit_card', None), ('card', None), ('Visa', None), ('MasterCard', None),
+         ('American_Express', None), ('Diners_Club', None), ('Discover', None), ('JCB', None)]
     ]
+
+ocy = OCyara('tests/')
+ocy.run('tests/example.yara')
