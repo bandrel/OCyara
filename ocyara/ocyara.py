@@ -162,7 +162,7 @@ class OCyara:
         for worker in self.workers:
             worker.join()
 
-    def list_matches(self, rules=None) -> Dict[str, Set[Tuple[str, Union[str, None]]]]:
+    def list_matches(self, rules_matched=None) -> Dict[str, Set[Tuple[str, Union[str, None]]]]:
         """
         List matched files and thier contexts (if available) in dictionary form.
 
@@ -173,18 +173,19 @@ class OCyara:
               rules are specified, all matches will be returned.
         """
         matches_to_return = {}
-        if type(rules) is str:
-            rules = [rules]
-        if rules is None:
-            rules = self.list_matched_rules()
+        if type(rules_matched) is str:
+            rules_matched = [rules_matched]
+        if rules_matched is None:
+            rules_matched = self.list_matched_rules()
+        # Step through each matched file and see if they matched any of the rules we're interested in.
         for filepath, matchedrules_with_contexts in self.matchedfiles[0].items():
             for matchedrulename, context in matchedrules_with_contexts:
-                for rule_to_list in rules:
-                    if matchedrulename == rule_to_list:
+                for rulename in rules_matched:
+                    if matchedrulename == rulename:
                         try:
-                            matches_to_return[rule_to_list].add((filepath, context))
+                            matches_to_return[rulename].add((filepath, context))
                         except KeyError:
-                            matches_to_return[rule_to_list] = {(filepath, context)}
+                            matches_to_return[rulename] = {(filepath, context)}
         return matches_to_return
 
     def list_matched_rules(self) -> set:
