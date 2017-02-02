@@ -14,6 +14,7 @@ import colorlog
 from PIL import Image
 from tqdm import tqdm
 import subprocess
+from typing import Dict, Set, Tuple, Union
 
 
 class OCyara:
@@ -68,8 +69,7 @@ class OCyara:
         else:
             self.logger.setLevel('WARN')
 
-    def run(self, yara_rule: object, auto_join: object = True, file_magic: object = False,
-            include_context: object = False) -> object:
+    def run(self, yara_rule: str, auto_join=True, file_magic=False, save_context=False) -> None:
         """
         Begin multithreaded processing of path files with the specified rule file.
 
@@ -117,7 +117,7 @@ class OCyara:
             self.logger.info('{0} worker processes being generated to process images. from the '
                              'queue'.format(self.threads))
             for i in range(self.threads):
-                p = Process(target=self._process_image, args=(yara_rule,))
+                p = Process(target=self._process_image, args=(yara_rule, save_context))
                 self.workers.append(p)
                 p.start()
             # Add items to queue for processing
@@ -162,13 +162,30 @@ class OCyara:
         for worker in self.workers:
             worker.join()
 
-    def list_matches(self, rulename: str) -> dict:
-        """Find scanned files that matched the specified rule and return them in a dictionary."""
-        files = []
-        for filepath, matchedrule in self.matchedfiles[0].items():
-            if rulename in matchedrule:
-                files.append(filepath)
-        return dict(rule=files)
+    def list_matches(self, rules=None) -> Dict[str, Set[Tuple[str, Union[str, None]]]]:
+        """
+        List matched files and thier contexts (if available) in dictionary form.
+
+        Keyword Arguments:
+
+            rules -- Accepts a string or list of strings indicating specific rules.
+              Only matches pertaining to the specified rule/s will be returned. If no
+              rules are specified, all matches will be returned.
+        """
+        matches_to_return = {}
+        if type(rules) is str:
+            rules = [rules]
+        if rules is None:
+            rules = self.list_matched_rules()
+        for filepath, matchedrules_with_contexts in self.matchedfiles[0].items():
+            for matchedrulename, context in matchedrules_with_contexts:
+                for rule_to_list in rules:
+                    if matchedrulename == rule_to_list:
+                        try:
+                            matches_to_return[rule_to_list].add((filepath, context))
+                        except KeyError:
+                            matches_to_return[rule_to_list] = {(filepath, context)}
+        return matches_to_return
 
     def list_matched_rules(self) -> set:
         """Process the matchedfiles dictionary and return a list of rules that were matched."""
@@ -177,7 +194,7 @@ class OCyara:
             [rules.add(matchedrule[0]) for matchedrule in matchedrules]
         return rules
 
-    def _process_image(self, yara_rule: str) -> None:
+    def _process_image(self, yara_rule: str, save_context: bool) -> None:
         """
         Perform OCR and yara rule matching as a worker.
 
@@ -214,6 +231,8 @@ class OCyara:
             with self.lock:
                 local_results_dict = self.matchedfiles[0]
                 if matches:
+                    if save_context:
+                        context = ocrtext
                     for x in matches:
                         try:
                             local_results_dict[filepath].append((x.rule, context))
@@ -286,16 +305,19 @@ class OCyara:
 
     @property
     def yara_output(self) -> str:
-        """Returns an the same output format as the standard yara program.
-        RuleName FileName
+        """
+        Returns the same output format as the standard yara program:
+        RuleName FileName, FileName
+        RuleName FileName...
+
         Where:
           RuleName is the name of the rule that was matched
-          FileName is the name of the file in which the match was found"""
+          FileName is the name of the file in which the match was found
+        """
         output_text = ''
-        for rule in ocy.list_matched_rules():
-            for k, v in ocy.list_matches(rule).items():
-                for i in v:
-                    output_text += rule+' '+i+'\n'
+        for rule, matched_files_and_contexts in self.list_matches().items():
+            for matched_file_and_context in matched_files_and_contexts:
+                output_text += rule + ' ' + matched_file_and_context[0] + '\n'
         return output_text
 
 

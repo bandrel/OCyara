@@ -131,13 +131,19 @@ class OCyara(builtins.object)
  |
  |  join(self, showprogress=True)
  |
- |  list_matches(self, rulename:str) -> dict
- |      Find scanned files that matched the specified rule and return them in a dictionary.
- |
- |  list_rules(self) -> set
+ |  list_matched_rules(self) -> set
  |      Process the matchedfiles dictionary and return a list of rules that were matched.
  |
- |  run(self, yara_rule:str, auto_join=True, file_magic=False) -> None
+ |  list_matches(self, rules=None) -> typing.Dict
+ |      List matched files and thier contexts (if available) in dictionary form.
+ |
+ |      Keyword Arguments:
+ |
+ |          rules -- Accepts a string or list of strings indicating specific rules.
+ |            Only matches pertaining to the specified rule/s will be returned. If no
+ |            rules are specified, all matches will be returned.
+ |
+ |  run(self, yara_rule:str, auto_join=True, file_magic=False, save_context=False) -> None
  |      Begin multithreaded processing of path files with the specified rule file.
  |
  |      Arguments:
@@ -153,6 +159,10 @@ class OCyara(builtins.object)
  |            of the target files to determine if they are an eligible image file
  |            type. For example, a JPEG file named 'picture.txt' will be processed by
  |            the OCR engine. file_magic uses the Linux "file" command.
+ |
+ |          include_context -- If True, when a file matches a yara rule, the returned
+ |            results dictionary will also include the full ocr text of the matched
+ |            file. This text can be further processed by the user if needed.
  |
  |  show_progress(self) -> None
  |      Generate a progress bar based on the number of items remaining in queue.
@@ -177,8 +187,10 @@ class OCyara(builtins.object)
  |      list of weak references to the object (if defined)
  |
  |  yara_output
- |      Returns an the same output format as the standard yara program.
- |      RuleName FileName
+ |      Returns the same output format as the standard yara program:
+ |      RuleName FileName, FileName
+ |      RuleName FileName...
+ |
  |      Where:
  |        RuleName is the name of the rule that was matched
  |        FileName is the name of the file in which the match was found
