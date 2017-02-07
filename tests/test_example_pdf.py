@@ -6,7 +6,7 @@ ocy.run('tests/example.yara')
 
 
 def num_unique_rule_matches():
-    return len(ocy.list_rules())
+    return len(ocy.list_matched_rules())
 
 
 def test_number_of_rules():
@@ -14,7 +14,7 @@ def test_number_of_rules():
 
 
 def test_example_pdf_rules():
-    assert ocy.list_rules() == {'card',
+    assert ocy.list_matched_rules() == {'card',
                                 'SSN',
                                 'credit_card',
                                 'JCB',
@@ -23,7 +23,7 @@ def test_example_pdf_rules():
                                 'American_Express',
                                 'MasterCard',
                                 'Discover'
-                                }
+                                        }
 
 
 def test_dict_matches():

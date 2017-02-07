@@ -50,11 +50,10 @@ class OCyara:
             else:
                 self.path += '/*'
         self.manager = Manager()
-        self.matchedfiles = self.manager.list()
-        self.matchedfiles.append({})
-        self.total_items_to_queue = self.manager.list([0])
-        self.total_added_to_queue = self.manager.list([0])
-        self.queue_items_completed = self.manager.list([0])
+        self.matchedfiles = None
+        self.total_items_to_queue = None
+        self.total_added_to_queue = None
+        self.queue_items_completed = None
         self.tempdir = tempfile.TemporaryDirectory()
         handler = colorlog.StreamHandler()
         handler.setFormatter(colorlog.ColoredFormatter(
@@ -95,6 +94,13 @@ class OCyara:
             handled_mime_types = [
                 'image/png', 'image/jpeg', 'application/pdf', 'image/gif', 'image/x-ms-bmp'
             ]
+            # Intialize counters to 0 and create an empty matchedfiles dict
+            self.total_items_to_queue = self.manager.list([0])
+            self.total_added_to_queue = self.manager.list([0])
+            self.queue_items_completed = self.manager.list([0])
+            self.matchedfiles = self.manager.list()
+            self.matchedfiles.append({})
+
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
             if file_magic:
                 # Queue files base on file contents
@@ -165,7 +171,7 @@ class OCyara:
                 files.append(filepath)
         return dict(rule=files)
 
-    def list_rules(self) -> set:
+    def list_matched_rules(self) -> set:
         """Process the matchedfiles dictionary and return a list of rules that were matched."""
         rules = set()
         for filepath, matchedrules in self.matchedfiles[0].items():
@@ -286,7 +292,7 @@ class OCyara:
           RuleName is the name of the rule that was matched
           FileName is the name of the file in which the match was found"""
         output_text = ''
-        for rule in ocy.list_rules():
+        for rule in ocy.list_matched_rules():
             for k, v in ocy.list_matches(rule).items():
                 for i in v:
                     output_text += rule+' '+i+'\n'
