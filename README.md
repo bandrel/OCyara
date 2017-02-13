@@ -156,6 +156,8 @@ class OCyara(builtins.object)
  |            worker processes have completed their work. If set to False, join()
  |            must be manually called following run() to ensure the queue is
  |            cleared and all workers have terminated.
+
+ |          show_progress -- Display a progress bar when join() is used.
  |
  |          file_magic -- If file_magic is enabled, ocyara will examine the contents
  |            of the target files to determine if they are an eligible image file

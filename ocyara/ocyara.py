@@ -68,7 +68,7 @@ class OCyara:
         else:
             self.logger.setLevel('WARN')
 
-    def run(self, yara_rule: str, auto_join=True, file_magic=False, save_context=False) -> None:
+    def run(self, yara_rule: str, auto_join=True, show_progress=True, file_magic=False, save_context=False) -> None:
         """
         Begin multithreaded processing of path files with the specified rule file.
 
@@ -80,6 +80,8 @@ class OCyara:
               worker processes have completed their work. If set to False, join()
               must be manually called following run() to ensure the queue is
               cleared and all workers have terminated.
+
+            show_progress -- Display a progress bar when join() is used.
 
             file_magic -- If file_magic is enabled, ocyara will examine the contents
               of the target files to determine if they are an eligible image file
@@ -147,7 +149,7 @@ class OCyara:
             self.q.put(Image.open(self.path))
             self.total_added_to_queue[0] += 1
         if auto_join:
-            self.join()
+            self.join(show_progress)
 
     def show_progress(self) -> None:
         """Generate a progress bar based on the number of items remaining in queue."""
