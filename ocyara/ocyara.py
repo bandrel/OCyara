@@ -322,7 +322,7 @@ class OCyara:
           FileName is the name of the file in which the match was found
         """
         output_text = ''
-        for rule, matched_files_and_contexts in self.list_matched_rules():
+        for rule, matched_files_and_contexts in self.list_matches().items():
             for matched_file_and_context in matched_files_and_contexts:
                 output_text += rule + ' ' + matched_file_and_context[0] + '\n'
         return output_text
