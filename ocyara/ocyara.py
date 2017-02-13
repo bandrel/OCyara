@@ -51,11 +51,10 @@ class OCyara:
             else:
                 self.path += '/*'
         self.manager = Manager()
-        self.matchedfiles = self.manager.list()
-        self.matchedfiles.append({})
-        self.total_items_to_queue = self.manager.list([0])
-        self.total_added_to_queue = self.manager.list([0])
-        self.queue_items_completed = self.manager.list([0])
+        self.matchedfiles = None
+        self.total_items_to_queue = None
+        self.total_added_to_queue = None
+        self.queue_items_completed = None
         self.tempdir = tempfile.TemporaryDirectory()
         handler = colorlog.StreamHandler()
         handler.setFormatter(colorlog.ColoredFormatter(
@@ -100,6 +99,13 @@ class OCyara:
             handled_mime_types = [
                 'image/png', 'image/jpeg', 'application/pdf', 'image/gif', 'image/x-ms-bmp'
             ]
+            # Intialize counters to 0 and create an empty matchedfiles dict
+            self.total_items_to_queue = self.manager.list([0])
+            self.total_added_to_queue = self.manager.list([0])
+            self.queue_items_completed = self.manager.list([0])
+            self.matchedfiles = self.manager.list()
+            self.matchedfiles.append({})
+
             # Determine the number of items that will be queued so workers can exit only after queuing is completed
             if file_magic:
                 # Queue files base on file contents

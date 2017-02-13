@@ -144,3 +144,20 @@ def test_yara_output():
 
 ocy = OCyara('tests/')
 ocy.run('tests/example.yara')
+
+
+def test_ocyara_rerun():
+    ocy_rerun_test = OCyara('tests/')
+    ocy_rerun_test.run('tests/example.yara')
+    ocy_rerun_test.run('tests/example.yara')
+    assert ocy_rerun_test.list_matched_rules() == {
+        'card',
+        'SSN',
+        'credit_card',
+        'JCB',
+        'Diners_Club',
+        'Visa',
+        'American_Express',
+        'MasterCard',
+        'Discover'
+    }
