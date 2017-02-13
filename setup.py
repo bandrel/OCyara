@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='OCyara',
-    version='0.0.4',
+    version='1.0.0',
     packages=find_packages(),
     url='https://github.com/bandrel/OCyara',
     license='GPL v3',
