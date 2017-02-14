@@ -67,9 +67,9 @@ installed:
 
 from ocyara import OCyara
 
-test = OCyara('./', recursive=True)
-test.run('rulefile.yara')
-print(test.list_matches())
+ocy = OCyara('./', recursive=True)
+ocy.run('rulefile.yara', file_magic=True)
+print(ocy.list_matches())
 ```
 
 Returns:
@@ -156,7 +156,7 @@ class OCyara(builtins.object)
  |            worker processes have completed their work. If set to False, join()
  |            must be manually called following run() to ensure the queue is
  |            cleared and all workers have terminated.
-
+ |
  |          show_progress -- Display a progress bar when join() is used.
  |
  |          file_magic -- If file_magic is enabled, ocyara will examine the contents
@@ -164,7 +164,7 @@ class OCyara(builtins.object)
  |            type. For example, a JPEG file named 'picture.txt' will be processed by
  |            the OCR engine. file_magic uses the Linux "file" command.
  |
- |          include_context -- If True, when a file matches a yara rule, the returned
+ |          save_context -- If True, when a file matches a yara rule, the returned
  |            results dictionary will also include the full ocr text of the matched
  |            file. This text can be further processed by the user if needed.
  |
