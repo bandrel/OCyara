@@ -88,7 +88,7 @@ class OCyara:
               type. For example, a JPEG file named 'picture.txt' will be processed by
               the OCR engine. file_magic uses the Linux "file" command.
 
-            include_context -- If True, when a file matches a yara rule, the returned
+            save_context -- If True, when a file matches a yara rule, the returned
               results dictionary will also include the full ocr text of the matched
               file. This text can be further processed by the user if needed.
         """
@@ -96,6 +96,8 @@ class OCyara:
         # Populate the queue with work
         if type(self.path) == str:
             self.logger.debug('Input file detected as a path')
+            if self.recursive:
+                self.path = self.path.rstrip('/') + '/**'
             all_files = glob.glob(self.path, recursive=self.recursive)
             handled_file_extensions = ['png', 'jpg', 'jpeg', 'pdf', 'gif', 'bmp']
             handled_mime_types = [
@@ -233,7 +235,10 @@ class OCyara:
                     worker_logger.debug('Queue still loading')
                     continue
             ocrtext = tesserocr.image_to_text(image)
-            rules = yara.compile(yara_rule)
+            try:
+                rules = yara.compile(yara_rule)
+            except yara.Error:
+                worker_logger.error('Invalid rule file/rule file not found: {0}'.format(yara_rule))
             matches = rules.match(data=ocrtext)
             # If there is a match, store the filename and the rule in a dictionary local to this process.
             # Create an editable copy of the master manager dict.
