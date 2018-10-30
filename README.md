@@ -91,7 +91,7 @@ matched it.
 ### CLI usage Example
 OCyara is not primarily intended to be used from the command line, but
 basic cli capablilities have been implemented to allow for
-easily-approachble testing of the library's core functionality.
+easily-approachable testing of the library's core functionality.
 
 ```
 usage: ocyara.py [-h] YARA_RULES_FILE TARGET_FILE/S`
